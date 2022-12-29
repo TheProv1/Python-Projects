@@ -23,8 +23,12 @@ while ans.lower() == 'y':
 			guessed_numbers.append(user_num)
 			print("The entered number is not correct try again.")
 			print("\n")
-			chances-=1
+			chances -= 1
+			print("Number of chance(s) left: ", chances)
 	
-	print("The number(s) entered is/are: ",guessed_numbers)
+	print("The number(s) entered is/are: ", guessed_numbers)
+	
+	print("\nThe number to be guessed was: ", num)
 	
 	ans = input("Do you wish to continue?(Y/n): ")
+	print("\n")
