@@ -5,7 +5,7 @@ num = random.randint(0,n+1)
 
 guessed_numbers = []
 
-print("\nYou have 5 chances in total to guess the number from 0 to ",n)
+print("\nYou have 5 chances in total to guess the number from 0 to", n)
 print()
 
 ans = 'y'
@@ -22,9 +22,9 @@ while ans.lower() == 'y':
 		else:
 			guessed_numbers.append(user_num)
 			print("The entered number is not correct try again.")
-			print("\n")
 			chances -= 1
 			print("Number of chance(s) left: ", chances)
+			print()
 	
 	print("The number(s) entered is/are: ", guessed_numbers)
 	
