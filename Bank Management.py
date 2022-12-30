@@ -122,8 +122,8 @@ def account_creation():
     acc_bal = int(input('Enter the current account balance: '))
 
 
-    cur.execute('insert into customer_details(Customer_ID, Customer_Name, Account_Number, Account_Balance) values (%d, %s, %d, %d);', (cus_id, name, acc_no, acc_bal))
-    cur.execute('commit') 
+    cur.execute('insert into customer_details(Customer_ID, Customer_Name, Account_Number, Account_Balance) values ({}, "{}", {}, {});'.format(cus_id, name, acc_no, acc_bal))
+    cur.execute('commit')
 
 
 def del_account():
@@ -134,14 +134,32 @@ def del_account():
     account_no = int(input("Enter the Account Number: "))
     confirmation = input("Are you sure?(Y/n): ")
     
-    if confirmation.lower() == 'n':
-        del_account_cmd = 'delete from customer_id where Account_Number = %s' %(account_no)
+    if confirmation.lower() == 'y':
+        del_account_cmd = 'delete from customer_details where Account_Number = %s' %(account_no)
         cur.execute(del_account_cmd)
         cur.execute('commit')
     
     else:
         print("Request Cancelled")
 
+
+def display_details():
+    '''
+    This function prints/displays the details of a bank account
+    '''
+
+    account_no = int(input("Enter Account Number: "))
+
+    retrieve_record = 'select * from customer_details where Account_Number = %s' %(account_no)
+    cur.execute(retrieve_record)
+    details = cur.fetchall()
+
+    for i in details:
+        print("CUSTOMER DETAILS FOR ACCOUNT NUMBER:", account_no," \n")
+        print("CUSTOMER ID:", i[0])
+        print("NAME:", i[1])
+        print("ACCOUNT NUMBER:", i[2])
+        print("ACCOUNT BALANCE:", i[3])
 
 ans = 'y'
 while ans.lower() == 'y':
@@ -160,7 +178,7 @@ while ans.lower() == 'y':
         del_account()
 
     elif choice == 4:
-        pass
+        display_details()
 
     else:
         print("Invalid Menu option entered")
@@ -168,3 +186,5 @@ while ans.lower() == 'y':
     print()
     ans = input("Do you wish to continue?(Y/n): ")
     print()
+
+conobj.close()
