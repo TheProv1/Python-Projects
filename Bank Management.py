@@ -5,7 +5,6 @@ import getpass
 login_count = 0
 
 for i in range(0, 2):
-    
     try:
         print("\n")
         passwd = getpass.getpass("Enter the MySQL Client Password: ")
@@ -32,7 +31,11 @@ for i in range(0, 2):
         if login_count == 3:
             exit()
 
-cur = conobj.cursor()
+try:
+    cur = conobj.cursor()
+
+except NameError:
+    print("This program requires Authorisation / DataBase Admin Password")
 
 admin_name = input("Enter the administrator name: ")
 print("Welcome", admin_name.capitalize())
@@ -55,7 +58,8 @@ def db_creation():
     This function creates the MySQL Bank Management DataBase
     '''
 
-    pre_existing_db = cur.fetchall('show databases')
+    cur.execute('show databases')
+    pre_existing_db = cur.fetchall()
     req_db = 'banking_db'
 
     if (req_db, ) in pre_existing_db:
@@ -68,12 +72,15 @@ def db_creation():
     
     cur.execute('use banking_db')
 
+db_creation()
+
 def table_creation():
     '''
     This function creates a table within the Banking DataBase
     '''
 
-    pre_existing_tables = cur.fetchall('show tables')
+    cur.execute('show tables')
+    pre_existing_tables = cur.fetchall()
     req_tables = ('customer_details', )
 
     if req_tables in pre_existing_tables:
@@ -81,12 +88,59 @@ def table_creation():
     
     else:
         print("Creating the Customer Table")
-        cur.execute("create table customer_details(Customer_ID int, Customer_Name varchar(255), Account_Number int, Customer_Age int)")
+        cur.execute("create table customer_details(Customer_ID int, Customer_Name varchar(255), Account_Number int, Account_Balance int)")
+        cur.execute('commit')
+
+table_creation()
 
 def account_balance_checker():
     '''
     This function checks for the balance in the Customer's account
     '''
+
+    customer_account_no = int(input("Enter the Account Number of the Customer: "))
+    cur.execute('select * from customer_details where Account_Number = %i;' %(customer_account_no))
+
+    record = cur.fetchall()
+
+    for i in record:
+        print("Customer Name: ", i[1])
+        print("BALANCE: ", i[3])
+
+
+def account_creation():
+    '''
+    This function creates a new Bank account for a Customer
+    '''
+    cus_name = input("Enter the First Name of the customer: ")
+    name = cus_name.capitalize()
+
+    cus_id = int(input('Enter the customer ID: '))
+
+    acc_no = int(input("Enter an account number: "))
+
+    acc_bal = int(input('Enter the current account balance: '))
+
+
+    cur.execute('insert into customer_details(Customer_ID, Customer_Name, Account_Number, Account_Balance) values (%d, %s, %d, %d);', (cus_id, name, acc_no, acc_bal))
+    cur.execute('commit') 
+
+
+def del_account():
+    '''
+    This function deletes an existing Bank Account from the database
+    '''
+
+    account_no = int(input("Enter the Account Number: "))
+    confirmation = input("Are you sure?(Y/n): ")
+    
+    if confirmation.lower() == 'n':
+        del_account_cmd = 'delete from customer_id where Account_Number = %s' %(account_no)
+        cur.execute(del_account_cmd)
+        cur.execute('commit')
+    
+    else:
+        print("Request Cancelled")
 
 
 ans = 'y'
@@ -97,13 +151,13 @@ while ans.lower() == 'y':
     choice = int(input("Enter your choice: "))
 
     if choice == 1:
-        pass
+        account_balance_checker()
     
     elif choice == 2:
-        pass
+        account_creation()
 
     elif choice == 3:
-        pass
+        del_account()
 
     elif choice == 4:
         pass
