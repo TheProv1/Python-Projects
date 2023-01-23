@@ -1,10 +1,11 @@
 import mysql.connector
 import time
 import getpass
+import sys
 
 login_count = 0
 
-for i in range(0, 2):
+for i in range(0, 3):
     try:
         print("\n")
         passwd = getpass.getpass("Enter the MySQL Client Password: ")
@@ -18,18 +19,20 @@ for i in range(0, 2):
             print("Password Entered is Incorrect\n")
             login_count = login_count + 1
         
-            if login_count == 3:
+            if login_count > 3:
                 print("\nPassword Entered Incorrectly 3 times")
                 time.sleep(5)
                 print('\nExiting Program')            
-                exit()
+                sys.exit(1)
+                break
 
         print(login_count)
 
     except mysql.connector.errors.ProgrammingError:
         print("\nConnection failed, incorrect password entered\n")
-        if login_count == 3:
-            exit()
+        if login_count > 3:
+            sys.exit(1)
+            break
 
 try:
     cur = conobj.cursor()
@@ -57,20 +60,23 @@ def db_creation():
     '''
     This function creates the MySQL Bank Management DataBase
     '''
+    try:
+        cur.execute('show databases')
+        pre_existing_db = cur.fetchall()
+        req_db = 'banking_db'
 
-    cur.execute('show databases')
-    pre_existing_db = cur.fetchall()
-    req_db = 'banking_db'
+        if (req_db, ) in pre_existing_db:
+            print("The required DataBase exists in the Client")
+    
+        else:
+            print("Creating the Bank DataBase")
+            cur.execute("create database banking_db")
+            cur.execute('commit')
+    
+        cur.execute('use banking_db')
 
-    if (req_db, ) in pre_existing_db:
-        print("The required DataBase exists in the Client")
-    
-    else:
-        print("Creating the Bank DataBase")
-        cur.execute("create database banking_db")
-        cur.execute('commit')
-    
-    cur.execute('use banking_db')
+    except NameError:
+        quit()
 
 db_creation()
 
@@ -117,7 +123,7 @@ def account_creation():
 
     cus_id = int(input('Enter the customer ID: '))
 
-    acc_no = int(input("Enter an account number: "))
+    acc_no = id(name)
 
     acc_bal = int(input('Enter the current account balance: '))
 
@@ -161,28 +167,111 @@ def display_details():
         print("ACCOUNT NUMBER:", i[2])
         print("ACCOUNT BALANCE:", i[3])
 
-ans = 'y'
-while ans.lower() == 'y':
-    print("\n\t\t\t\t\tMAIN MENU\n")
-    print('1. Check for Balance in an account \n2. Create a new account \n3. Delete an account \n4. Display Account Details\n')
+min_balance = 2500
 
-    choice = int(input("Enter your choice: "))
+def transfer_function():
+    '''
+    This function transfers an amount 'x' from account "A" to account "B"
+    '''
+    remitter_account_no = int(input("Enter the Remitter Account Number: "))
+    beneficiary_account_no = int(input("Enter the Beneficiary Account Number: "))
+    amount_x = int(input("Enter the amount to be transfered: "))
 
-    if choice == 1:
-        account_balance_checker()
-    
-    elif choice == 2:
-        account_creation()
-
-    elif choice == 3:
-        del_account()
-
-    elif choice == 4:
-        display_details()
+    cur.execute('select Account_Balance from customer_details where Account_Number = %d' %(remitter_account_no))
+    remitter = cur.fetchall()
+    bal = remitter[0][0]
+    if (bal - amount_x) > min_balance:
+        cmd_upd_rem = 'update customer_details set Account_Balance = Account_Balance - %s' %(amount_x) + ' where Account_Number = %s' %(remitter_account_no)
+        cmd_upd_ben = 'update customer_details set Account_Balance = Account_Balance + %s' %(amount_x) + ' where Account_Number = %s' %(beneficiary_account_no)
+        cur.execute(cmd_upd_rem)
+        cur.execute(cmd_upd_ben)
+        cur.execute('commit')
+        time.sleep(5)
+        print("\nTransaction Completed Successfully")
 
     else:
-        print("Invalid Menu option entered")
+        print("Transaction cannot continue. Account Balance is less than minimum balance.")
+
+def deposit_function():
+    '''
+    This function deposits an amount 'x' into an Account
+    '''
+    dep_amt = int(input("Enter the amount to be deposited: "))
+    account = int(input("Enter the Account to deposit the amount: "))
+    cmd_upd_bal = 'update customer_details set Account_Balance = Account_Balance + %s' %(dep_amt) + ' where Account_Number = %s' %(account)
+    cur.execute(cmd_upd_bal)
+    cur.execute('commit')
+
+    time.sleep(5)
+
+    print("Money Deposited Successfully")
     
+    
+def withdraw_function():
+    '''
+    This function withdraws an amount 'x' from an Account
+    '''
+
+    try:
+        withdraw_amt = int(input("Enter the amount to be withdrawn: "))
+        account = int(input("Enter the Account Number to withdraw the amount: "))
+        cmd_upd_bal = 'update customer_details set Account_Balance = Account_Balance - %d' %(withdraw_amt) + ' where Account_number = %s' %(account)
+        cur.execute(cmd_upd_bal)
+        cur.execute('commit')
+
+        print("Money Withdrawn Successfully")
+
+    except AttributeError:
+        print("Un Unknown Error has caused the program from executing properly")
+
+ans = 'y'
+while ans.lower() == 'y':
+    print("\n\t\t\t\t\t\tMAIN MENU\n")
+    print('1. Account Management \n2. Transactions\n')
+
+    main_menu_choice = int(input("Enter your choice: "))
+    print()
+
+    if main_menu_choice == 1:
+        
+        print('\t\t\tAccount Management\n\n1. Check for Balance in an account \n2. Create a new account \n3. Delete an account \n4. Display Account Details\n')
+        acc_choice = int(input("Enter your choice: "))
+
+        if acc_choice == 1:
+            account_balance_checker()
+    
+        elif acc_choice == 2:
+            account_creation()
+
+        elif acc_choice == 3:
+            del_account()
+
+        elif acc_choice == 4:
+            display_details()
+
+        else:
+            print("Invalid Option Entered")
+    
+    elif main_menu_choice == 2:
+        
+        print('\t\t\tTransactions\n1. Transfer Money \n2. Depositing Money \n3. Withdrawing Money')
+        tra_choice = int(input("Enter your choice: "))
+
+        if tra_choice == 1:
+            transfer_function()
+
+        elif tra_choice == 2:
+            deposit_function()
+
+        elif tra_choice == 3:
+            withdraw_function()
+
+        else:
+            print("Invalid Option Entered")
+
+    else:
+        print("Invalid Main-Menu Option Entered")
+
     print()
     ans = input("Do you wish to continue?(Y/n): ")
     print()
