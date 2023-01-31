@@ -139,6 +139,11 @@ print("""\t\tLibrary Table\n
 |           |          |       |        |           |       |             |            |
 |           |          |       |        |           |       |             |            |
 |           |          |       |        |           |       |             |            |
+|           |          |       |        |           |       |             |            |
+|           |          |       |        |           |       |             |            |
+|           |          |       |        |           |       |             |            |
+|           |          |       |        |           |       |             |            |
+|           |          |       |        |           |       |             |            |
 +-----------+----------+-------+--------+-----------+-------+-------------+------------+
 \n\n
 """)
@@ -152,8 +157,14 @@ print("""\t\tMember Table\n
 |             |             |                |       |           |              |
 |             |             |                |       |           |              |
 |             |             |                |       |           |              |
+|             |             |                |       |           |              |
+|             |             |                |       |           |              |
+|             |             |                |       |           |              |
+|             |             |                |       |           |              |
+|             |             |                |       |           |              |
 +-------------+-------------+----------------+-------+-----------+--------------+
 \n\n""")
+
 
 def addition_of_records_Member():
     '''
@@ -270,7 +281,57 @@ def modify_records_in_member_table():
             pass
 
 
-def return_of_books_and_fine_calculator():#Not complete, add the returning book function
+def issuing_books_to_member():
+    '''
+    This function issues the book to the member
+    if the number of books issued is less than the alloted number of books
+    else it displays an appropriate message
+    '''
+
+    mem_code = int(input('Enter the Member Code: '))
+    
+    cur.execute('select * from member where Member_Code = {}'.format(mem_code))
+    member_record = cur.fetchall()
+
+    for i in member_record:
+        max_limit = i[4]
+        number_of_issued_books = i[5]
+    
+    if (max_limit - number_of_issued_books) == 0:
+        print('You cannot issue any book.\nKindly return some of the book(s) which you have issued.')
+    
+    else:
+        cur.execute('select Book_Code, Sub_Code, Title, Author from library where Member_Code = 0')
+        available_books = cur.fetchall()
+
+        print('\n\tBooks which are available Currently: \n')
+        for i in available_books:
+            print('Book Code: ', i[0])
+            print('Subject Code: ', i[1])
+            print('Title: ', i[2])
+            print('Author: ', i[3])
+            print('\n')
+
+            book_code_req_issue = i[0]
+
+            query = input('Is this the book which you want to issue?(Y/n): ')
+
+            if query.lower() == 'n':
+                pass
+
+            else:
+                cur.execute('select CURDATE')
+                current_date = cur.fetchall()
+
+                number_of_issued_books += 1
+                cur.execute('update library set Member_Code = {} where Book_Code = {}'.format(mem_code, book_code_req_issue))
+                cur.execute('update library set Issue_Date = {} where Book_Code = {}'.format(current_date, book_code_req_issue))
+                cur.execute('update member set N_O_B_Issued = {} where Member_Code = {}'.format(number_of_issued_books, mem_code))
+                cur.execute('commit')
+                break
+
+
+def return_of_books_and_fine_calculator():
     '''
     This function allows the returning of books and calculates the amount to be paid as fine
 
@@ -299,6 +360,9 @@ def return_of_books_and_fine_calculator():#Not complete, add the returning book 
 
             cur.execute('select Book_Code from Library where Member_Code = {}'.format(m_code))
             issued_books_by_member = cur.fetchall()
+
+            cur.execute('select N_O_B_Issued from Member where Member_Code = {}'.format(m_code))
+            books_issued = cur.fetchall()
 
             for j in issued_books_by_member:
                 if (book_code,) == j:
@@ -332,6 +396,20 @@ def return_of_books_and_fine_calculator():#Not complete, add the returning book 
 
         else:
             pass
+    
+    return_query = input('Do you want to return the book(Y/n): ')
+    if return_query.lower() == 'y':
+        for i in issued_books_by_member:
+            cur.execute('update library set Issue_Date = "{}" and Member_Code = {}'.format(("1111-01-01"), 0))
+            cur.execute('update Member set N_O_B_Issued = {} where Member_Code = {}'.format((books_issued - 1), m_code))
+            cur.execute('commit')
+        
+    else:
+        print('Book not returned')
+        print('Setting issue date as Current date: {}'.format(curdate))
+        cur.execute('update library set Issue_Date = {} where Member_Code = {} and Book_Code = {}'.format(curdate, m_code, book_code))
+        cur.execute('commit')
+
 
 def availability_of_a_certain_book():
     '''
@@ -364,7 +442,6 @@ def availability_of_a_certain_book():
             print("Price: ", i[5])
             print('\n\n')
     
-
         book_code = int(input("Enter the Book Code: "))
 
         cur.execute('select * from Library where Sub_Code like ("{}") and Book_Code = {}'.format(book_sub, book_code))
@@ -425,6 +502,7 @@ def availability_of_a_certain_book():
         else:
             print('The Book is Issued by another member\n')
 
+
 def book_report():
     '''
     Generates a Book Report which is ordered by
@@ -456,6 +534,7 @@ def book_report():
     print('The Subject Codes which are present currently are: ')
     for i in list_subject:
         print(i)
+
 
 def books_issued_by_member():
     '''
@@ -490,6 +569,7 @@ def books_issued_by_member():
             
             print('Number of books issued by Member {} is/are: {}'.format(i, book_count))
 
+
 def available_books():
     '''
     This function generates a report for
@@ -521,6 +601,7 @@ def available_books():
             print('\n')
     
         print('There is / are {} available book(s)'.format(count_available))
+
 
 def book_defaulter():
     '''
@@ -562,6 +643,7 @@ def book_defaulter():
         for i in defaulter_lst:
             print(i)
 
+
 def members_in_the_library():
     '''
     This function displays all the 
@@ -578,6 +660,7 @@ def members_in_the_library():
         count_member += 1
     
     print('There are {} registered members'.format(count_member))
+
 
 def Report_of_DataBase():
     '''
@@ -614,22 +697,59 @@ def Report_of_DataBase():
     else:
         print('Invalid Option Entered')
 
+
+def exit():
+    '''
+    This function exists the code
+    and
+    Closes the connection to the DataBase
+    '''
+
+    print('Closing connection to Server DataBase in....')
+    for i in range(3, 0, -1):
+        print(i, '\n')
+        time.sleep(1)
+
+    print('Connection Closed Successfully')
+
+    cur.close()
+
+
 ans = 'y'
 while ans.lower() == 'y':
     print('\t\t\t\tMain Menu\n\n')
-    print('1. Addition of Books\n2. Addition of Members\n3. Modifying Records\n4. Modifying Member info\n5. Issue Book\n6. Return Books')
-    print('7. Availability of a certain book\n8. Report\n\n')
+    print('1. Addition of Books\n2. Addition of Members\n3. Modifying Member info\n4. Issue Book\n5. Return Books')
+    print('6. Availability of a certain book\n7. Report\n8. Exit\n\n')
 
     choice = int(input("Enter your choice: "))
 
+    if choice == 1:
+        addition_of_records_Library()
+
+    elif choice == 2:
+        addition_of_records_Member()
+
+    elif choice == 3:
+        modify_records_in_member_table()
+
+    elif choice == 4:
+        issuing_books_to_member()
+
+    elif choice == 5:
+        return_of_books_and_fine_calculator()
+
+    elif choice == 6:
+        availability_of_a_certain_book()
+
+    elif choice == 7:
+        Report_of_DataBase()
+
+    elif choice == 8:
+        exit()
+
+    else:
+        print('Invalid Option Entered')
     
-
-
-print('Closing connection to Server DataBase in....')
-for i in range(3, 0, -1):
-    print(i, '\n')
-    time.sleep(1)
-
-print('Connection Closed Successfully')
-
-cur.close()
+    print('\n')
+    ans = input('Do you wish to continue?(Y/n): ')
+    print()
