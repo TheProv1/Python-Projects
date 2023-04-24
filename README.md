@@ -1,9 +1,15 @@
 # Python_Projects
 This repository contains the codes for some Python Projects
+  
+    /-\       /----  |      |  ------- |\    |
+   /   \     /       |      |     |    | \   |
+  /-----\    ------  |  /\  |     |    |  \  |
+ /       \        /  | /  \ |     |    |   \ |
+/         \  ----/   |/    \|  ------- |    \|
 
 \\
 DISCLAIMER:
-ALL THE CODES ARE CREATED BY ME. THERE IS NO PLAGIARISM
+ALL THE CODES ARE CREATED BY ME.
 //
 
 The ideas for these projects are taken from:
