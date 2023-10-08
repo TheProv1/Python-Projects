@@ -1,11 +1,11 @@
 # Python-based Projects
 
 
-##### Repository Description
+## Repository Description
 
 This repository contains the codes for some Python Projects.
 
-# Reference Links
+## Reference Links
 
 The ideas for these projects are taken from:
 
@@ -16,6 +16,6 @@ The ideas for these projects are taken from:
 ### Site 3: https://www.dataquest.io/blog/python-projects-for-beginners/
 
 
-# Author
+## Author
 
 Aswin Krishna (TheProv1)
