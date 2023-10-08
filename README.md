@@ -13,3 +13,4 @@ The ideas for these projects are taken from:
 
 
 ![image](https://github.com/TheProv1/Python_Projects/assets/116379127/ee563115-4730-45ec-b6ad-18c90fe988c2)
+![image](https://github.com/TheProv1/Python_Projects/assets/116379127/bc3bec14-df2f-43da-ad88-1555a28c27e2)
