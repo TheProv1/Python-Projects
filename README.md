@@ -1,6 +1,11 @@
-# Python_Projects
-This repository contains the codes for some Python Projects
+# Python-based Projects
 
+
+# Repository Description
+
+This repository contains the codes for some Python Projects.
+
+# Reference Links
 
 The ideas for these projects are taken from:
 
